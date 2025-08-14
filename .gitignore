@@ -1,0 +1,17 @@
+# Ficheros de variables locales con secretos
+*.tfvars
+
+# Ficheros de estado de Terraform, que pueden contener información sensible
+*.tfstate
+*.tfstate.backup
+
+# Directorio de plugins y módulos de Terraform
+.terraform/
+
+# Logs de errores de Terraform
+crash.log
+*.log
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
