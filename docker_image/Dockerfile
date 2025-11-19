@@ -1,25 +1,23 @@
-# Usamos una imagen oficial de PHP con el servidor Apache
-FROM php:7.4-apache
+FROM alpine:latest AS builder
 
-# Actualizamos la lista de paquetes e instalamos la dependencia necesaria (unzip)
-RUN apt-get update && apt-get install -y unzip
+WORKDIR /app
 
-# Instalamos las extensiones de PHP que DVWA necesita (mysqli Y pdo_mysql)
-RUN docker-php-ext-install mysqli pdo_mysql && docker-php-ext-enable mysqli
+RUN apk add --no-cache unzip
 
-# Establecemos el directorio de trabajo
-WORKDIR /var/www/html
-
-# Copiamos el archivo zip local al contenedor
 COPY dvwa.zip .
 
-# Descomprimimos el zip y limpiamos
 RUN unzip dvwa.zip && \
     mv DVWA-master/* . && \
-    rm -rf DVWA-master dvwa.zip
+    rm -rf DVWA-master dvwa.zip && \
+    cp config/config.inc.php.dist config/config.inc.php
 
-# Copiamos la configuración por defecto para que el archivo exista
-RUN cp config/config.inc.php.dist config/config.inc.php
+FROM php:7.4-apache
 
-# Damos los permisos correctos a la carpeta para que Apache pueda escribir en ella
+RUN docker-php-ext-install mysqli pdo_mysql && \
+    docker-php-ext-enable mysqli
+
+WORKDIR /var/www/html
+
+COPY --from=builder /app .
+
 RUN chown -R www-data:www-data /var/www/html
